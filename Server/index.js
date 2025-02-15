@@ -2,12 +2,20 @@ const express = require('express');
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const { message } = require('statuses');
 require("dotenv").config();
 
 const app = express();
 app.use(cors());
 app.use(express.json()); 
-
+app.use(
+    cors({
+      origin: 'http://localhost:3000',  // Allow only requests from your React app's origin
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      credentials: true,
+    })
+  );
+  
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -53,6 +61,33 @@ app.post("/signup", async (req, res) => {
     } catch (error) {
         console.error("Signup error:", error);
         res.status(500).json({ message: "Server error" });
+    }
+});
+app.post("/login", async (req, res) => { // ✅ Use POST
+    try {
+        const { email, password } = req.body;
+
+        // ✅ Validate input fields
+        if (!email || !password) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json({ message: "User not found" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+
+        res.status(200).json({ message: "Login successful" }); // ✅ Fix status code
+
+    } catch (e) {
+        console.error("Error received in login:", e);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
 

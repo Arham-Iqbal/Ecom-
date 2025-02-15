@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [email, setEmail] = useState('');
-
+  const navigate=useNavigate()
   const handleSubmit = async () => {
     if (!email) {
       alert('Please enter an email');
@@ -25,11 +26,15 @@ const Signup = () => {
 
       const data = await response.json();
       alert(data.message);
+      navigate("/")
     } catch (e) {
       console.error('Error received:', e);
       alert('Something went wrong');
     }
   };
+  const handleLogin=()=>{
+    navigate("/login")
+  }
 
   return (
     <div>
@@ -52,6 +57,7 @@ const Signup = () => {
         onChange={(e) => setConfirmPass(e.target.value)}
       />
       <button onClick={handleSubmit}>Submit</button>
+      <span onClick={handleLogin}>already signed up then login</span>
     </div>
   );
 };
